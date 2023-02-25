@@ -96,7 +96,7 @@ int main(void)
 	
    
   UART_Init();
-  UART_Rx();
+  //UART_Rx();
   
   UART_Tx((uint8_t*)"\r\n\r\n[APP]", strlen("\r\n\r\n[APP]"));
   //HAL_Delay(100);

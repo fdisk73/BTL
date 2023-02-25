@@ -63,7 +63,9 @@ int main(void)
        - Low Level Initialization
      */
   HAL_Init();
-
+    
+  
+    
   /* Initialize LED3, LED4 and LED5 */
   //BSP_LED_Init(LED3);
   //BSP_LED_Init(LED4);

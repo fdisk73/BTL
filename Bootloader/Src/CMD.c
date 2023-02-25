@@ -85,8 +85,46 @@ void CMD_Write(void)
   Flash_CheckProgramData();
 }
 
+//__IO uint32_t VectorTable[48] __attribute__((at(0X20000100)));
+//#define SYSCFG_MemoryRemap_SRAM                 ((uint8_t)0x03)
+//#define VECT_TAB_OFFSET  0x6000
+
+void SYSCFG_MemoryRemapConfig(uint32_t SYSCFG_MemoryRemap)
+{
+  uint32_t tmpctrl = 0;
+
+  /* Check the parameter */
+  assert_param(IS_SYSCFG_MEMORY_REMAP(SYSCFG_MemoryRemap));
+
+  /* Get CFGR1 register value */
+  tmpctrl = SYSCFG->CFGR1;
+
+  /* Clear MEM_MODE bits */
+  tmpctrl &= (uint32_t) (~SYSCFG_CFGR1_MEM_MODE);
+
+  /* Set the new MEM_MODE bits value */
+  tmpctrl |= (uint32_t) SYSCFG_MemoryRemap;
+
+  /* Set CFGR1 register with the new memory remap configuration */
+  SYSCFG->CFGR1 = tmpctrl;
+}
+
+void SetVectorTable(void)
+{
+    //__ASM("__Vectors  DCD  __initial_sp");
+    //__ASM("__Vectors  DCD  msp");
+}
+
+    
 void CMD_Jump(void)
 {
+    /*uint32_t i = 0;
+    
+	for(i = 0; i < 48; i++)
+	{
+		VectorTable[i] = *(__IO uint32_t*)((FLASH_BASE | VECT_TAB_OFFSET) + (i<<2));
+	}*/
+	
     
     HAL_RCC_DeInit();
     SysTick->CTRL = 0;
@@ -97,6 +135,7 @@ void CMD_Jump(void)
     /* ARM Cortex-M Programming Guide to Memory Barrier Instructions.*/
     __DSB();
     __HAL_SYSCFG_REMAPMEMORY_SYSTEMFLASH();
+    
     /* Remap is bot visible at once. Execute some unrelated command! */
     __DSB();
     __ISB();
@@ -106,5 +145,9 @@ void CMD_Jump(void)
     JumpToApplication = (pFunction) JumpAddress;
     /* Initialize user application's Stack Pointer */
     __set_MSP(*(__IO uint32_t*) APPLICATION_ADDRESS);
+    //__enable_irq();
+    //SetVectorTable();
+//#define __VECTOR_TABLE  __Vectors
+    //SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_SRAM);
 	JumpToApplication();
 }
